@@ -13,6 +13,8 @@ void inordine(struct nod *root);
 void postordine(struct nod *root);
 int medie_count(struct nod  *root, int *c);
 void srd_un_fiu(struct nod *root,int *c);
+int doi_copii(struct nod *root);
+void duplica(struct nod *root);
 int main()
 {  
     struct nod *root = init_tree();
@@ -38,8 +40,48 @@ printf("srd : \n");
 int r = 0;
 srd_un_fiu(root, &r);
 /*-----------CERINTA CU NU FRUNZE AU DOI FII--------------------*/
+ 
+  printf("noduri cu 2 fii am? : %d \n", doi_copii(root));
+/*-----------------------------DUPLICA-------------------------*/
+duplica(root);
+inordine(root);
 
     return 0;
+}
+void duplica(struct nod *root)
+{
+    if (root == NULL)
+    return;
+    else{
+         if (root->dr == NULL && root->st != NULL) {
+            struct nod *newn = calloc(1,sizeof(struct nod));
+            newn->info = root->info;
+            newn->st = root->st;
+            root->st = newn;
+            newn->dr = NULL;
+         }
+         else{
+            if (root->dr != NULL && root->st == NULL){
+                  struct nod *newn = calloc(1,sizeof(struct nod));
+                  newn->info = root->info;
+                  newn->st = NULL;
+                  root->st = newn;
+            }  
+         }
+    }
+    duplica(root->st);
+    duplica(root->dr);
+}
+int doi_copii(struct nod *root)
+{  
+   if (root == NULL){
+    return 1;
+   }
+ if (root->st == NULL && root->st == NULL)
+   return 1;
+if (root->dr != NULL && root->st != NULL)
+ return doi_copii(root->dr) && doi_copii(root->st);
+ return 0;
 }
 void srd_un_fiu(struct nod *root,int *c)
 {
