@@ -3,7 +3,8 @@
 struct nod
 {
    int info;
-   struct nod *dr, *st;
+   struct nod *dr;
+   struct nod *st;
 };
 struct nod *init_tree();
 struct nod *build_node(int a, struct nod *left_root, struct nod *right_root);
@@ -48,30 +49,31 @@ inordine(root);
 
     return 0;
 }
-void duplica(struct nod *root)
-{
-    if (root == NULL)
-    return;
-    else{
-         if (root->dr == NULL && root->st != NULL) {
-            struct nod *newn = calloc(1,sizeof(struct nod));
-            newn->info = root->info;
-            newn->st = root->st;
-            root->st = newn;
-            newn->dr = NULL;
-         }
-         else{
-            if (root->dr != NULL && root->st == NULL){
-                  struct nod *newn = calloc(1,sizeof(struct nod));
-                  newn->info = root->info;
-                  newn->st = NULL;
-                  root->st = newn;
-            }  
-         }
+void duplica(struct nod* root) {
+    if (root == NULL) {
+        return;
     }
+
+    // capcana -- daca parcurgeam la final intram in bucla ->ies din stiva de apeluri ->corup memoria->malloc nu stie ce sa acceseze ->seg fault dar e un segfault duplicitar asa
     duplica(root->st);
     duplica(root->dr);
+
+    // smecherie ca sa nu stau sa scriu mult
+    if ((root->st == NULL) != (root->dr == NULL)) {
+        struct nod* new_node = (struct nod*) malloc(sizeof(struct nod));
+        new_node->info = root->info;
+        new_node->st = NULL;
+        new_node->dr = NULL;
+
+        // 
+        if (root->st == NULL) {
+            root->st = new_node;
+        } else {
+            root->dr = new_node;
+        }
+    }
 }
+
 int doi_copii(struct nod *root)
 {  
    if (root == NULL){
