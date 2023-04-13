@@ -69,7 +69,9 @@ void duplica(struct nod* root) {
         if (root->st == NULL) {
             root->st = new_node;
         } else {
-            root->dr = new_node;
+            
+            new_node->st = root->st;
+            root->st = new_node;
         }
     }
 }
