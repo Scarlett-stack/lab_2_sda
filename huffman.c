@@ -1,168 +1,181 @@
+// Huffman Coding in C
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-struct list
-{
-    int info;
-    char c;
-    struct list *next;
+
+#define MAX_TREE_HT 50
+
+struct MinHNode {
+  char item;
+  unsigned freq;
+  struct MinHNode *left, *right;
 };
-struct nod
-{
-    char c;    // pt litera
-    int frecv; // asta e campul pe care il bag la min heap
-    struct nod *st;
-    struct nod *dr;
+
+struct MinHeap {
+  unsigned size;
+  unsigned capacity;
+  struct MinHNode **array;
 };
-struct data
-{
-    int frecv;
-    char c;
-};
-struct nod *insert_node(int a, struct nod *root)
-{
-    if (root == NULL){
-     root =build_node(a,NULL,NULL); //e doar radacina sau frunza  
-     return root;
-    }       
-        if (a > root->frecv)
-        root->dr = insert_node(a,root->dr);
-        else//<=
-        root->st = insert_node(a,root->st);
-    return root;
-}
-int cmp(const void *a, const void *b)
-{
-    struct data *a1 = (struct data *)a;
-    struct data *b1 = (struct data *)b;
-    return a1->frecv - b1->frecv;
-}
-void Typer(struct list *c)
-{
-    printf("din typer ");
-    struct list *c1 = c;
-    while(c1 != NULL)
-    {
-        printf("%c %d\n",c1->c, c1->info);
-        c1 = c1->next;
-    }
+
+// Create nodes
+struct MinHNode *newNode(char item, unsigned freq) {
+  struct MinHNode *temp = (struct MinHNode *)malloc(sizeof(struct MinHNode));
+
+  temp->left = temp->right = NULL;
+  temp->item = item;
+  temp->freq = freq;
+
+  return temp;
 }
 
-struct list *create_list(struct data *queue, int size);
-struct nod *newnode(char c, int frecv,int frecv2);
-struct data *build_pqueue(int v[],int size);
-struct nod *build_tree_huff(struct list *start,int size);
-int main()
-{
-    char str[] = "AAAAAABBBCCDDDEEEEFFFFFFGGGGGGGGGGG";
-    int baza = 0;
-    int v[26] = {0};
-    int i = 0;
-    while (i < strlen(str))
-    {
-        v[str[i] - 65]++;
-        i++;
-    }
-    int size = 0;
-    for (int i = 0; i < 26; i++)
-    {
-        if (v[i] != 0){
-            size++;
-            baza = baza + v[i]; 
-        }
-           
-        printf("%d ", v[i]);
-    }
- struct nod *root = malloc(sizeof(struct nod));
- root->c = '#';
- root->frecv = baza;
+// Create min heap
+struct MinHeap *createMinH(unsigned capacity) {
+  struct MinHeap *minHeap = (struct MinHeap *)malloc(sizeof(struct MinHeap));
 
-struct data *queue = build_pqueue(v,size);
-qsort(queue,size,sizeof(struct data),cmp);
- for (i = 0; i<size; i++)
- printf("\n%c %d",queue[i].c, queue[i].frecv);
- struct list *start = create_list(queue,size);
- Typer(start);
- root = build_tree_huff(start,size);
- printf("din root: %c %d\n", root->c, root->frecv);
+  minHeap->size = 0;
 
-    return 0;
+  minHeap->capacity = capacity;
+
+  minHeap->array = (struct MinHNode **)malloc(minHeap->capacity * sizeof(struct MinHNode *));
+  return minHeap;
 }
-struct data *build_pqueue(int v[],int size)
-{
-    // primesc vectorul de frecventa
-    struct data *queue = malloc(size *sizeof(struct data));
-    int i = 0;
-    for (i = 0; i<size; i++){
-        if (v[i] != 0){
-        queue[i].frecv = v[i];
-        queue[i].c = 'A' + i;
-        printf("cine e c: %c\n",queue[i].c);
-        }  
-    }
-    return queue;
-    
+
+// Function to swap
+void swapMinHNode(struct MinHNode **a, struct MinHNode **b) {
+  struct MinHNode *t = *a;
+  *a = *b;
+  *b = t;
 }
-struct nod *build_tree_huff(struct list *start,int size)
-{
-    struct nod *left, *right, *top;
-    int i=0;
-    while (size > 1){
-        left = malloc(sizeof(struct nod));
-        right = malloc(sizeof(struct nod));
-        left->frecv = start->info;
-        left->dr = NULL;
-        left->st = NULL;
-        start = start->next;
-        size--;
-        right->frecv = start->info;
-        right->dr = NULL;
-        right->st = NULL;
-        size--;
-        start = start->next;
-        top = newnode('#',left->frecv, right->frecv);
-        top->dr = right;
-        top->st = left;
-        //functie de instert in heap
 
+// Heapify
+void minHeapify(struct MinHeap *minHeap, int idx) {
+  int smallest = idx;
+  int left = 2 * idx + 1;
+  int right = 2 * idx + 2;
 
-    }
-    return top;
+  if (left < minHeap->size && minHeap->array[left]->freq < minHeap->array[smallest]->freq)
+    smallest = left;
 
+  if (right < minHeap->size && minHeap->array[right]->freq < minHeap->array[smallest]->freq)
+    smallest = right;
+
+  if (smallest != idx) {
+    swapMinHNode(&minHeap->array[smallest], &minHeap->array[idx]);
+    minHeapify(minHeap, smallest);
+  }
 }
-struct nod *newnode(char c, int frecv1, int frecv2)
-{
-    struct nod *newn = malloc(sizeof(struct nod));
-    newn->frecv = frecv1 + frecv2;
-    newn->c = c;
-    return newn;
 
+// Check if size if 1
+int checkSizeOne(struct MinHeap *minHeap) {
+  return (minHeap->size == 1);
 }
-struct list *create_list(struct data *queue, int size) //implementez coada ca o lista
-{
-   struct list *start = malloc(sizeof(struct list));
-   struct list *aux,*final;
-   int i=1;
-   start->c = queue[0].c;
-   start->info = queue[0].frecv;
-   start->next = NULL;
-   aux = start;
-   int j;
-   while (i<size){
-    final = malloc(sizeof(struct list));
-    if (final == NULL){
-        perror("la final");
-        return NULL;
-    }
-    else{
-        final->info = queue[i].frecv;
-        final->c = queue[i].c;
-        final->next = NULL;
-        aux->next = final;
-        aux = final;
-    }
-    i++;
 
-   }
-   return start;
+// Extract min
+struct MinHNode *extractMin(struct MinHeap *minHeap) {
+  struct MinHNode *temp = minHeap->array[0];
+  minHeap->array[0] = minHeap->array[minHeap->size - 1];
+
+  --minHeap->size;
+  minHeapify(minHeap, 0);
+
+  return temp;
+}
+
+// Insertion function
+void insertMinHeap(struct MinHeap *minHeap, struct MinHNode *minHeapNode) {
+  ++minHeap->size;
+  int i = minHeap->size - 1;
+
+  while (i && minHeapNode->freq < minHeap->array[(i - 1) / 2]->freq) {
+    minHeap->array[i] = minHeap->array[(i - 1) / 2];
+    i = (i - 1) / 2;
+  }
+  minHeap->array[i] = minHeapNode;
+}
+
+void buildMinHeap(struct MinHeap *minHeap) {
+  int n = minHeap->size - 1;
+  int i;
+
+  for (i = (n - 1) / 2; i >= 0; --i)
+    minHeapify(minHeap, i);
+}
+
+int isLeaf(struct MinHNode *root) {
+  return !(root->left) && !(root->right);
+}
+
+struct MinHeap *createAndBuildMinHeap(char item[], int freq[], int size) {
+  struct MinHeap *minHeap = createMinH(size);
+
+  for (int i = 0; i < size; ++i)
+    minHeap->array[i] = newNode(item[i], freq[i]);
+
+  minHeap->size = size;
+  buildMinHeap(minHeap);
+
+  return minHeap;
+}
+
+struct MinHNode *buildHuffmanTree(char item[], int freq[], int size) {
+  struct MinHNode *left, *right, *top;
+  struct MinHeap *minHeap = createAndBuildMinHeap(item, freq, size);
+
+  while (!checkSizeOne(minHeap)) {
+    left = extractMin(minHeap);
+    right = extractMin(minHeap);
+
+    top = newNode('$', left->freq + right->freq);
+
+    top->left = left;
+    top->right = right;
+
+    insertMinHeap(minHeap, top);
+  }
+  return extractMin(minHeap);
+}
+
+void printHCodes(struct MinHNode *root, int arr[], int top) {
+  if (root->left) {
+    arr[top] = 0;
+    printHCodes(root->left, arr, top + 1);
+  }
+  if (root->right) {
+    arr[top] = 1;
+    printHCodes(root->right, arr, top + 1);
+  }
+  if (isLeaf(root)) {
+    printf("  %c   | ", root->item);
+    printArray(arr, top);
+  }
+}
+
+// Wrapper function
+void HuffmanCodes(char item[], int freq[], int size) {
+  struct MinHNode *root = buildHuffmanTree(item, freq, size);
+
+  int arr[MAX_TREE_HT], top = 0;
+
+  printHCodes(root, arr, top);
+}
+
+// Print the array
+void printArray(int arr[], int n) {
+  int i;
+  for (i = 0; i < n; ++i)
+    printf("%d", arr[i]);
+
+  printf("\n");
+}
+
+int main() {
+  char arr[] = {'A', 'B', 'C', 'D'};
+  int freq[] = {5, 1, 6, 3};
+
+  int size = sizeof(arr) / sizeof(arr[0]);
+
+  printf(" Char | Huffman code ");
+  printf("\n--------------------\n");
+
+  HuffmanCodes(arr, freq, size);
 }
