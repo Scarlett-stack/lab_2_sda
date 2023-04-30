@@ -19,6 +19,18 @@ struct data
     int frecv;
     char c;
 };
+struct nod *insert_node(int a, struct nod *root)
+{
+    if (root == NULL){
+     root =build_node(a,NULL,NULL); //e doar radacina sau frunza  
+     return root;
+    }       
+        if (a > root->frecv)
+        root->dr = insert_node(a,root->dr);
+        else//<=
+        root->st = insert_node(a,root->st);
+    return root;
+}
 int cmp(const void *a, const void *b)
 {
     struct data *a1 = (struct data *)a;

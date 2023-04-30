@@ -8,7 +8,7 @@ struct graf
     int *coada;
 };
 int nr = 0;
-void cc(struct graf*g,int x);
+void cc(struct graf*g,int x, int *nr1);
 void bf(struct graf *g,int x);
 void df(struct graf *g,int x);
 int grad(struct graf *g, int x);
@@ -38,14 +38,15 @@ int grad5 = grad(g,5);
 //printf("gradul nodului 5: %d\n",grad5);
    // bf(g,1);
    ///cc(g,1);
+   int nr1 = 0;
     for (int i=1; i<=g->n; i++){
         if (g->visitat[i] == 0){
-            nr++;
-            cc(g,i);
+            nr1++;
+            cc(g,i, &nr1);
         }
     }
-    printf("nr= %d",nr);
-    for (int i=1; i<=nr; i++)
+    printf("nr= %d",nr1);
+    for (int i=1; i<=nr1; i++)
     {
         printf("i :%d \n",i);
         for (int j=1; j<=g->n;j++)
@@ -55,15 +56,15 @@ int grad5 = grad(g,5);
     //df(g,1);
     return 0;
 }
-void cc(struct graf*g,int x)
+void cc(struct graf*g,int x, int *nr1)
 {
      int k;
-    g->visitat[x] = nr;
-    printf("nr din cc: %d\n", nr);
+    g->visitat[x] = *nr1;
+    printf("nr din cc: %d\n", *nr1);
     //printf("nr %d si nod  : %d\n",nr,x); //afisarea s-a face pe nodul pe care esti nu la urmatorul
     for (k=1; k<=g->n;k++){
           if (g->mat[x][k] == 1 && g->visitat[k] == 0){
-        cc(g,k);
+        cc(g,k, nr1);
         
       }
     }
