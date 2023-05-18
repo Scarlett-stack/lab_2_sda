@@ -62,6 +62,7 @@ void minHeapify(struct MinHeap *minHeap, int idx) {
   if (smallest != idx) {
     swapMinHNode(&minHeap->array[smallest], &minHeap->array[idx]);
     minHeapify(minHeap, smallest);
+    //printf()
   }
 }
 

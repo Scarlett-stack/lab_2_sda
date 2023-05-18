@@ -5,7 +5,9 @@ struct graf
 {
     int n;
     int **mat;
+    int **costuri;
 };
+void add_edge2(struct graf *g, int x, int y, int cost);
 int print(struct graf *g, int dist[], int n) {
    printf("\n");
    for (int i = 1; i <= g->n; i++)
@@ -92,8 +94,19 @@ struct graf *g1 = init1();
    // del_edge(g,2,1);
     printg(g);
     FloydWarshall(g);
-
+  struct graf *g3 = malloc(sizeof(struct graf));
+  g3->mat = malloc(20*sizeof(int *));
+    int i;
+    for (i=0; i<=20; i++)
+        g3->mat[i] = calloc(20,sizeof(int));
+  g3->costuri = malloc(sizeof(int *));
+   for (i=0; i<=20; i++)
+    g3->costuri[i] = calloc(20,sizeof(int));
     return 0;
+}
+void add_edge2(struct graf *g, int x, int y, int cost)
+{
+  
 }
 struct graf *init1()
 {
@@ -173,7 +186,7 @@ void FloydWarshall(struct graf *g)
   }
  // dist[6][2]=200;
 
-  // Actualizarea matricei de distanțe
+  // Actualizarea matricei de distante
   for (k = 1; k <= g->n; k++) {
     for (i = 1; i <= g->n; i++) {
       for (j = 1; j <= g->n; j++) {
